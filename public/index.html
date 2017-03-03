@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>Login</title>
+
+	<!-- Bootstrap Core CSS -->
+	<link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet">
+
+	<!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+	<!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+	<!--[if lt IE 9]>
+		<script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+		<script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+	<![endif]-->
+	<script type="text/javascript" src="//platform.linkedin.com/in.js">
+	  api_key: 7o8vk39vmbgs
+	  scope: r_basicprofile r_emailaddress
+	  onLoad: Linkedin.init
+	</script>
+</head>
+
+<body>
+
+	<div class="container" style="margin: 10px 0 100px 0">
+		<div class="row">
+			<div class="col-md-6 form-container">
+				<div class="panel panel-default">
+					<div class="panel-heading">
+						<h3 class="panel-title">
+							<p class="title">Login</p>
+						</h3>
+					</div>
+					<div class="panel-body">
+						<form role="form" action="profile.html">
+							<fieldset>
+								<div class="form-group">
+									<input class="form-control" placeholder="Username" name="email" id="email" type="text" autofocus>
+								</div>
+								<div class="form-group">
+									<input class="form-control" placeholder="Password" id="password" name="password" type="password">
+								</div>
+								<div class="form-group">
+									<button class="btn btn-primary btn-sm align-right btn-login" type="button" onclick="userLogin()">Login</button>
+									<ul id="js-messages"></ul>
+									<script type="IN/Login"
+										data-onAuth="Linkedin.onAuthCallback"
+										data-onLogout="Linkedin.onLogoutCallback">
+										</script>
+								</div>
+							</fieldset>
+						</form>
+						<div class="etc-login-form">
+						<p><a href="reset.html">Reset password</a> | <a href="register.html">Sign up</a></p>
+					</div>
+					</div>
+				</div>
+				<div class="clear"></div>
+			</div>
+		</div>
+	</div>
+
+	<!-- jQuery -->
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+</body>
+
+<script type="text/javascript">
+(function($, origin){
+	var $MessageList = $('#js-messages');
+
+	function message(p_sMessage){
+		$MessageList.append($('<li>' + p_sMessage + '</li>'));
+	}
+	function lnLogin(email, password){
+		$.post( origin + '/api/login', {email: email, password: password})
+		.done(function(rs){
+			var r = JSON.parse(rs);
+			if( r !== false ){
+				console.log('message', r);
+				location.href = origin + "/profile.html";
+			}else{
+				alert("user not found");
+			}
+		})
+	}
+	function lnLogout(){
+		$.get( origin +'/api/logout')
+		.done(function(){
+			location.href = origin
+		})
+		.fail(function(err){
+			console.log('Error: ' + err.responseText);
+		});
+	}
+	window.Linkedin = {
+		init : function(){
+			message('You can now login.');
+			
+			$('.IN-widget').bind('click', function(){
+				message('You just clicked the Login Button');
+			});
+		}
+		, onAuthCallback : function(){
+			message('You just logged in.');
+			IN.API.Profile("me").fields("id,firstName,lastName,email-address,location:(name)").result(function (me) {
+				var profile = me.values[0];
+				var profileData = {};
+				profileData.email         =  profile.emailAddress;
+				profileData.id            =  0;
+				profileData.fullname      =  profile.firstName + " " + profile.lastName;
+				profileData.address       =  profile.location.name;
+				profileData.password     =  profile.id;
+				$.post( origin +'/api/register', profileData)
+				.done(function(rs){
+					var r = JSON.parse(rs);
+					if( r !== false ){
+					   lnLogin(profile.emailAddress, profileData.password);
+					}
+				})
+				.fail(function(err){
+					console.log('Error: ' + err.responseText);
+				});
+			});
+		}
+		, onLogoutCallback : function(){
+			message('You just logged out.');
+			lnLogout();
+		}
+	};    
+}(jQuery, window.location.origin));
+</script>
+<script type="text/javascript">
+	var origin = window.location.origin; 
+	$.post(origin + '/api/checkLogin')
+	.done(function(rs){
+		var r = JSON.parse(rs);
+		if( r !== false ){
+			console.log('Success', rs);
+			location.href = origin + "/profile.html";
+		}
+	})
+	.fail(function(err){
+		console.log('Error: ' + err.responseText);
+	});
+</script> 
+<script type="text/javascript">
+	function userLogin(e){
+		var loginData = {};
+		loginData.email         =  $('#email').val();
+		loginData.password      =  $('#password').val();
+		if( loginData.email != "" && loginData.password != ""){
+			$.post( origin + '/api/login', loginData)
+			.done(function(rs){
+				var r = JSON.parse(rs);
+				if( r !== false ){
+					console.log('message', r);
+					location.href = origin + "/profile.html";
+				}else{
+					alert("user not found");
+				}
+			})
+			.fail(function(err){
+				console.log('Error: ' + err.responseText);
+			});
+		}else{
+			alert("Email/Password should not be empty")
+		}
+	}
+</script>
+</html>

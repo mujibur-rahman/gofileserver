@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Login</title>
+
+    <!-- Bootstrap Core CSS -->
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+        <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+</head>
+
+<body>
+
+    <div class="container" style="margin: 10px 0 100px 0">
+        <div class="row">
+            <div class="col-md-6 form-container">
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <h3 class="panel-title">
+                            <p class="title">Login</p>
+                        </h3>
+                    </div>
+                    <div class="panel-body">
+                        <form role="form" action="profile.html">
+                            <fieldset>
+                                <div class="form-group">
+                                    <input class="form-control" placeholder="Username" name="email" id="email" type="text" autofocus>
+                                </div>
+                                <div class="form-group">
+                                    <input class="form-control" placeholder="Password" id="password" name="password" type="password">
+                                </div>
+                                <div class="form-group">
+                                    <button class="btn btn-primary btn-sm align-right btn-login" type="button" onclick="userLogin()">Login</button>
+                                </div>
+                            </fieldset>
+                        </form>
+                        <div class="etc-login-form">
+                        <p><a href="reset.html">Reset password</a>|<a href="register.html">create new account</a></p>
+                    </div>
+                    </div>
+                </div>
+                <div class="clear"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- jQuery -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+    <!-- Bootstrap Core JavaScript -->
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+</body>
+<script type="text/javascript">
+    var origin = window.location.origin;
+    $.post(origin + '/api/checkLogin')
+    .done(function(rs){
+        var r = JSON.parse(rs);
+        if( r !== false ){
+            console.log('Success', rs);
+            location.href = origin + "/profile.html";
+        }else{
+            location.href = origin + "/register.html";
+        }
+    })
+    .fail(function(err){
+        console.log('Error: ' + err.responseText);
+    });
+</script> 
+<script type="text/javascript">
+    function userLogin(e){
+        var loginData = {};
+        loginData.email         =  $('#email').val();
+        loginData.password      =  $('#password').val();
+        if( loginData.email != "" && loginData.password != ""){
+            $.post( origin + '/api/login', loginData)
+            .done(function(rs){
+                var r = JSON.parse(rs);
+                if( r !== false ){
+                    console.log('message', r);
+                }else{
+                    alert("user not found");
+                }
+            })
+            .fail(function(err){
+                console.log('Error: ' + err.responseText);
+            });
+        }else{
+            alert("Email/Password should not be empty")
+        }
+    }
+</script>
+</html>
