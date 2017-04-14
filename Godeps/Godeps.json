@@ -1,0 +1,6 @@
+{
+	"ImportPath": "github.com/mujibur-rahman/gofileserver",
+	"GoVersion": "go1.8",
+	"GodepVersion": "v74",
+	"Deps": []
+}
